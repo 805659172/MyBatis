@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="com.gg.dao.impl"/>
+    <context:component-scan base-package="com.gg.service.impl"/>
+    <context:component-scan base-package="com.gg.controller"/>
+
+    <!--
+        id：标签对象在IOC里面的key
+        class：类的完全限定名
+        scope="prototype": 用户每次从IOC容器取对象，IOC容器都给调用者一个新的对象，多例，使用的时候被创建
+        scope="singleton": 对象在IOC容器中只会存在一个，单例，对象在XML解析的过程中会被创建
+        scope="request": 在web项目里面，同一个request里面共享一个对象
+        scope="session": 在web项目里面，同一个session里面共享一个对象
+
+        name:在springMVC里面指定controller的请求路径
+        name="/user.action"
+
+        lazy-init="true"//延迟加载，在使用的时候加载，默认为false
+
+
+    -->
+    <!-- 使用无参的构造方法创建对象 -->
+    <bean id="user01" class="com.gg.entity.User" scope="prototype"/>
+    <!--
+        使用静态工厂
+        class:静态工厂类的完全限定名
+        factory-method：静态工厂类里面的静态方法名
+    -->
+    <bean id="user00" class="com.gg.factory.UserFactory" factory-method="getUser"/>
+    <!--
+        使用实例工厂创建对象
+        factory-bean:实例工厂的对象ID
+        factory-method:实例工厂里面的方法名
+     -->
+    <bean id="userFactory" class="com.gg.factory.UserFactory"/>
+    <bean id="user02" factory-bean="userFactory" factory-method="getUser2"/>
+
+    <!-- 声明Dao -->
+    <bean id="userDao" class="com.gg.dao.impl.UserDaoImpl"/>
+    <bean id="userDao3" class="com.gg.dao.impl.UserDao3Impl"/>
+    <!-- 生命service -->
+    <bean id="userService" class="com.gg.service.impl.UserServiceImpl">
+        <property name="userDao" ref="userDao3"/>
+    </bean>
+    <!-- 声明controller -->
+    <bean id="userController" class="com.gg.controller.UserController">
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <!--
+        对象属性初始化方式1，使用set方法
+        ref:指向IOC容器里面的某一个对象
+     -->
+    <bean id="date01" class="java.util.Date"/>
+    <bean id="user03" class="com.gg.entity.User">
+        <!--
+            name：指类里面的属性名对应的set方法
+            value：给属性赋值
+            ref：使用IOC容器里面的某一个对象给属性赋值
+        -->
+        <property name="ID" value="1"/>
+        <property name="sName" value="GG"/>
+        <property name="sAddress" value="LL"/>
+    </bean>
+
+    <!--
+        对象初始化方法2，使用有参的构造方法注入
+        type:参数类型的类的完全限定名
+    -->
+    <bean id="user04" class="com.gg.entity.User">
+        <!-- index：构造方法的参数索引下标 -->
+        <constructor-arg index="0" value="1"/>
+        <constructor-arg index="1" value="羽"/>
+        <constructor-arg index="2" value="GG"/>
+    </bean>
+    <bean id="user05" class="com.gg.entity.User">
+        <!-- name：构造方法的形参名字 -->
+        <constructor-arg name="ID" value="1"/>
+        <constructor-arg name="sAddress" value="羽"/>
+        <constructor-arg name="sName" value="GG"/>
+    </bean>
+
+    <bean id="note01" class="com.gg.entity.Note">
+        <property name="ltText" value="note1"/>
+    </bean>
+
+    <bean id="user06" class="com.gg.entity.User">
+        <property name="strList">
+            <list>
+                <value>天天</value>
+                <value>天地</value>
+            </list>
+        </property>
+        <property name="noteList">
+            <list>
+                <bean class="com.gg.entity.Note">
+                    <constructor-arg name="ID" value="1"/>
+                    <constructor-arg name="sTitle" value="GG"/>
+                    <constructor-arg name="ltText" value="GGG"/>
+                    <constructor-arg name="nInputUserID" value="4"/>
+                    <constructor-arg name="dtInputDate" ref="date01"/>
+                    <constructor-arg name="nStatusID" value="1"/>
+                </bean>
+                <bean class="com.gg.entity.Note">
+                    <constructor-arg name="ID" value="2"/>
+                    <constructor-arg name="sTitle" value="GGGGG"/>
+                    <constructor-arg name="ltText" value="GGGGGGG"/>
+                    <constructor-arg name="nInputUserID" value="4"/>
+                    <constructor-arg name="dtInputDate" ref="date01"/>
+                    <constructor-arg name="nStatusID" value="1"/>
+                </bean>
+            </list>
+        </property>
+        <property name="strSet">
+            <set>
+                <value>set1</value>
+                <value>set2</value>
+            </set>
+        </property>
+        <property name="notesSet">
+            <set>
+                <bean class="com.gg.entity.Note">
+                    <property name="ltText" value="notesSet1"/>
+                </bean>
+                <bean class="com.gg.entity.Note">
+                    <property name="ltText" value="notesSet2"/>
+                </bean>
+            </set>
+        </property>
+        <property name="strMap">
+            <map>
+                <entry key="1" value="22"/>
+                <entry key="11" value="222"/>
+            </map>
+        </property>
+        <property name="noteMap">
+            <map>
+                <entry key="33" value-ref="note01"/>
+                <entry key="44">
+                    <bean class="com.gg.entity.Note">
+                        <property name="ltText" value="44"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="properties">
+            <props>
+                <prop key="11">22</prop>
+            </props>
+        </property>
+    </bean>
+    <!-- autowire="byType":根据类里面的属性名类型到IOC容器里面去找对应类型的对象或子类对象进行注入
+        autowire="byName":根据类里面的属性名去IOC容器里面找ID=属性名的对象进行注入
+     -->
+    <bean id="note02" class="com.gg.entity.Note" autowire="byType" >
+    </bean>
+
+    <!-- 声明目标对象 -->
+    <bean id="man" class="com.gg.entity.Man" ></bean>
+    <!--声明通知对象-->
+    <bean id="beforeAdvise" class="com.gg.advise.MyBeforeAdvise"></bean>
+    <bean id="afterAdvise" class="com.gg.advise.MyAfterAdvise"/>
+    <bean id="aroundAdvise" class="com.gg.advise.MyAroundAdvise"/>
+    <bean id="exceptionAdvise" class="com.gg.advise.MyExceptionAdvise"/>
+    <!--进行AOP配置-->
+    <aop:config>
+        <!--
+            声明切面
+            execution(* com.gg.entity.*.*(..))
+                        com.gg.entity包下的所有类里面的所有方法里面的所有参数
+        -->
+        <aop:pointcut id="pc1" expression="execution(* com.gg.entity.*.*(..))"/>
+        <!--
+            织如操作
+            advice-ref：通知对象
+            pointcut-ref：织入到哪一个切面
+        -->
+        <!--<aop:advisor advice-ref="beforeAdvise" pointcut-ref="pc1"/>
+        <aop:advisor advice-ref="afterAdvise" pointcut-ref="pc1"/>
+        -->
+        <aop:advisor advice-ref="aroundAdvise" pointcut-ref="pc1"/>
+
+        <aop:advisor advice-ref="exceptionAdvise" pointcut-ref="pc1"/>
+
+    </aop:config>
+</beans>
